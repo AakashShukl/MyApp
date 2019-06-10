@@ -1,11 +1,16 @@
 package olso.in.contact;
 
+import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
+import android.os.Build;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.widget.Toast;
 
 public class Splash extends AppCompatActivity {
 
@@ -18,38 +23,50 @@ public class Splash extends AppCompatActivity {
 
 
     }
-    protected void requestPermission() {
-        if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                android.Manifest.permission.READ_CONTACTS)) {
-            // show UI part if you want here to show some rationale !!!
+    private boolean hasPhoneContactsPermission(String permission)
+    {
+        boolean ret = false;
 
-        } else {
+        // If android sdk version is bigger than 23 the need to check run time permission.
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 
-            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.READ_CONTACTS},
-                    READ_CONTACTS_PERMISSIONS_REQUEST);
+            // return phone read contacts permission grant status.
+            int hasPermission = ContextCompat.checkSelfPermission(getApplicationContext(), permission);
+            // If permission is granted then return true.
+            if (hasPermission == PackageManager.PERMISSION_GRANTED) {
+                ret = true;
+            }
+        }else
+        {
+            ret = true;
         }
-
+        return ret;
     }
 
+    private void requestPermission(String permission)
+    {
+        String requestPermissionArray[] = {permission};
+        ActivityCompat.requestPermissions(this, requestPermissionArray, 1);
+    }
+
+    // After user select Allow or Deny button in request runtime permission dialog
+    // , this method will be invoked.
     @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case READ_CONTACTS_PERMISSIONS_REQUEST: {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+        int length = grantResults.length;
+        if(length > 0)
+        {
+            int grantResult = grantResults[0];
 
+            if(grantResult == PackageManager.PERMISSION_GRANTED) {
 
-
-                } else {
-
-                    // permission denied,Disable the
-                    // functionality that depends on this permission.
-                }
-                return;
+                Toast.makeText(getApplicationContext(), "You allowed permission.", Toast.LENGTH_LONG).show();
+            }else
+            {
+                Toast.makeText(getApplicationContext(), "You denied permission.", Toast.LENGTH_LONG).show();
             }
-
         }
     }
     private class initializeApp extends AsyncTask<Void, Void, Void> {
@@ -68,19 +85,21 @@ public class Splash extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            if (ActivityCompat.checkSelfPermission(Splash.this, android.Manifest.permission.READ_CONTACTS)
-                    == PackageManager.PERMISSION_GRANTED) {
 
-            } else {
-                requestPermission();
-            }
             startActivity(new Intent(Splash.this, MainActivity
                     .class));
+            finish();
         }
 
         @Override
         protected void onPreExecute() {
-
+            if(!hasPhoneContactsPermission(Manifest.permission.READ_CONTACTS))
+            {
+                requestPermission(Manifest.permission.READ_CONTACTS);
+            }else {
+                // getAllContacts();
+                //Toast.makeText(ContactsOperationActivity.this, "Contact data has been printed in the android monitor log..", Toast.LENGTH_SHORT).show();
+            }
 
 
         }
