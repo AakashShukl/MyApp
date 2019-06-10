@@ -1,10 +1,19 @@
 package olso.in.contact;
+import android.Manifest;
+import android.annotation.TargetApi;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.ContentResolver;
+import android.content.DialogInterface;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -19,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
     RecyclerView rvContacts;
     static Boolean start=true;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -27,7 +37,6 @@ public class MainActivity extends AppCompatActivity {
         rvContacts = (RecyclerView) findViewById(R.id.rvContacts);
         progressDialog.setMessage("Loading");
         // getAllContacts();
-
 
 
     }
